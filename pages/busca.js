@@ -1,24 +1,38 @@
 import Head from 'next/head';
 import Link from 'next/link';
+import { useState } from 'react';
 import styles from '../styles/Home.module.css';
 
 export default function Home({list}) {
+    const [searchText, setSearchText] = useState('');
+    const [movieList, setMovieList] = useState([]);
+    const handleSearch = async () => {
+        if(searchText !== '') {
+            const result = await fetch(`http://localhost:3000/api/search?q=${searchText}`)
+            const json = await result.json();
+            setMovieList(json.list)
+        }
+    }
   return (
     <div className={styles.container}>
       <Head>
-        <title>Home | Destaques</title>
+        <title>Busca</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <main className={styles.main}>
         <h1 className="title">
-          Filmes em destaque
+          Busca
         </h1>
-        <Link href="/busca"><a>Ir para a busca</a></Link>
-        <Link href="/sobre"><a>Sobre</a></Link>
+
+        <input type="text" value={searchText} onChange={e=>setSearchText(e.target.value)}></input>
+        <button onClick={handleSearch}>Buscar</button>
+        <Link href="/"><a>Voltar</a></Link>
+
+        <hr></hr>
         <ul>
-          {list.map(item=>(
-            <li key={item.id}>
+            {movieList.map(item=>(
+            <li>
               
                 <>
                 
@@ -35,16 +49,4 @@ export default function Home({list}) {
       </main>
     </div>
   )
-}
-
-export async function getServerSideProps() {
-  const res = await fetch('http://localhost:3000/api/trending');
-  const json = await res.json();
-
-  return {
-    props: {
-      list: json.list
-    }
-  }
-
 }
